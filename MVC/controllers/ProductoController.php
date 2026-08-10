@@ -1,86 +1,111 @@
-<?php 
-    require './repositories/mysql/Database.php';
-    require './models/Product.php';
+<?php
 
-class ProductController{
+require './repositories/mysql/Database.php';
+require './models/Product.php';
+
+class ProductController
+{
     private $productModel;
 
-    public function __construct(){
-        //Aca creo la base de datos para poner obtener el objeto inicial
-        $database = new Database(); 
+    public function __construct()
+    {
+        // Crear la conexión a la base de datos
+        $database = new Database();
 
-        //Crear la conexion con esa conexion ya puedo trabajar
+        // Obtener la conexión
         $db = $database->getConnection();
 
-       $this->productModel = new Product($db);
+        // Crear el modelo y pasarle la conexión
+        $this->productModel = new Product($db);
     }
 
-    public function read(){
-      /* $products = [[
-            'id'=>1,
-            'nombre' => "Mouse",
-            'cantidad' => 2,
-            'descuento' => 5,
-            'precio' => 150
-        ]];*/
+    public function read()
+    {
+        // Obtener todos los productos
         $products = $this->productModel->getAll();
-        /*
-        print_r($products[0]);
-        $unProducto = $products[0];
-        print($unProducto['nombre']);
-        print($products[2]['nombre']);*/
+
+        // Enviar los productos a la vista
         include_once './views/home.php';
     }
 
-    public function create(){
-        print_r($_POST);
-        print($_POST['nombre']);
-        print($_POST['precio']);
-        print($_POST['descuento']);
-        print($_POST['cantidad']);
+    public function create()
+    {
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-        
+            $nombre = $_POST['nombre'];
+            $precio = $_POST['precio'];
+            $descuento = $_POST['descuento'];
+            $cantidad = $_POST['cantidad'];
 
-        if( $_SERVER["REQUEST_METHOD"] === "POST"){
-       
-        $nombre = $_POST['nombre'];
-        $precio = $_POST['precio'];
-        $descuento = $_POST['descuento'];
-        $cantidad = $_POST['cantidad'];
+            // Crear el producto
+            $this->productModel->create(
+                $nombre,
+                $precio,
+                $descuento,
+                $cantidad
+            );
 
-        $this->productModel->create($nombre,$precio,$descuento,$cantidad);
-        header('Location: ./index.php?action=read');
-        exit();
+            // Regresar a la lista
+            header('Location: ./index.php?action=read');
+            exit();
         }
 
+        // Mostrar formulario de creación
         include_once './views/create.php';
     }
 
-    public function update(){
-        print($_GET['id']);
+    public function update()
+    {
+        // Obtener el ID enviado por GET
         $id = $_GET['id'];
 
-        //RETO: OBTENER EL PRODUCTO POR ID CON getById($id) y guardarlo en una variable
+        // RETO:
+        // Obtener el producto por ID utilizando getById($id)
+        // y guardarlo en una variable.
+        $product = $this->productModel->getById($id);
 
-
-        if( $_SERVER["REQUEST_METHOD"] === "POST"){
-       
-        $nombre = $_POST['nombre'];
-        $precio = $_POST['precio'];
-        $descuento = $_POST['descuento'];
-        $cantidad = $_POST['cantidad'];
-
-        $this->productModel->update($id,$nombre,$precio,$descuento,$cantidad);
-        header('Location: ./index.php?action=read');
-        exit();
+        // Si no existe el producto
+        if (!$product) {
+            die("Producto no encontrado");
         }
 
+        // Si el formulario fue enviado
+        if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+            $nombre = $_POST['nombre'];
+            $precio = $_POST['precio'];
+            $descuento = $_POST['descuento'];
+            $cantidad = $_POST['cantidad'];
+
+            // Actualizar el producto
+            $this->productModel->update(
+                $id,
+                $nombre,
+                $precio,
+                $descuento,
+                $cantidad
+            );
+
+            // Regresar a la lista
+            header('Location: ./index.php?action=read');
+            exit();
+        }
+
+        // Enviar $product a la vista
         include_once './views/edit.php';
     }
 
-    public function delete(){
+    public function delete()
+    {
+        // Obtener el ID
+        $id = $_GET['id'];
 
+        // Eliminar producto
+        $this->productModel->delete($id);
+
+        // Regresar a la lista
+        header('Location: ./index.php?action=read');
+        exit();
     }
 }
-
 ?>
