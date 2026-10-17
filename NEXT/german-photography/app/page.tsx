@@ -1,4 +1,4 @@
-
+export const instant = false;
 import Link from "next/link";
 import { getProjects } from "@/lib/queries";
 

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+export const instant = false;
 
 type ProjectPageProps = {
   params: Promise<{ slug: string }>;
